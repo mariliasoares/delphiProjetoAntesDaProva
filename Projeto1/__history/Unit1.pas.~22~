@@ -1,0 +1,84 @@
+unit Unit1;
+
+interface
+
+uses
+  Classes, SysUtils, IWAppForm, IWApplication, IWColor, IWTypes, IWVCLComponent,
+  IWBaseLayoutComponent, IWBaseContainerLayout, IWContainerLayout,
+  IWTemplateProcessorHTML, Data.DB, Datasnap.DBClient, IWCompButton,
+  Vcl.Controls, IWVCLBaseControl, IWBaseControl, IWBaseHTMLControl, IWControl,
+  IWCompEdit;
+
+type
+  TIWForm1 = class(TIWAppForm)
+    IWTemplateProcessorHTML1: TIWTemplateProcessorHTML;
+    ClientDataSet1: TClientDataSet;
+    ClientDataSet1CustNo: TFloatField;
+    ClientDataSet1Company: TStringField;
+    ClientDataSet1Addr1: TStringField;
+    ClientDataSet1Addr2: TStringField;
+    ClientDataSet1City: TStringField;
+    ClientDataSet1State: TStringField;
+    ClientDataSet1Zip: TStringField;
+    ClientDataSet1Country: TStringField;
+    ClientDataSet1Phone: TStringField;
+    ClientDataSet1FAX: TStringField;
+    ClientDataSet1TaxRate: TFloatField;
+    ClientDataSet1Contact: TStringField;
+    ClientDataSet1LastInvoiceDate: TDateTimeField;
+    IWEdit1: TIWEdit;
+    IWEdit2: TIWEdit;
+    IWEdit3: TIWEdit;
+    IWButton1: TIWButton;
+    procedure IWTemplateProcessorHTML1UnknownTag(const AName: string;
+      var VValue: string);
+    procedure IWButton1Click(Sender: TObject);
+  public
+  end;
+
+implementation
+
+{$R *.dfm}
+
+
+procedure TIWForm1.IWButton1Click(Sender: TObject);
+begin
+   ClientDataSet1.Edit;
+   ClientDataSet1.FieldByName('CustNo').AsInteger := strtoint(IWEdit1.Text);
+   ClientDataSet1.FieldByName('Company').AsInteger := (IWEdit2.Text);
+   ClientDataSet1.FieldByName('Country').AsInteger := (IWEdit3.Text);
+   //ClientDataSet1.Post;
+
+   webapplication.CallBackResponse.AddJavaScriptToExecute('$(''#myModal'').modal(''hide'')');
+end;
+
+procedure TIWForm1.IWTemplateProcessorHTML1UnknownTag(const AName: string;
+  var VValue: string);
+  var vAux1, vAux2, vAux3 : string;
+begin
+
+  if AnsiUpperCase(AName) = 'BANANA' then
+  begin
+    ClientDataSet1.First;
+    while not ClientDataSet1.eof do
+    begin
+    //---
+    vAux1 := ClientDataSet1.FieldByName('CustNo').AsString;
+    vAux2 := ClientDataSet1.FieldByName('Company').AsString;
+    vAux3 := ClientDataSet1.FieldByName('Country').AsString;
+    //---
+    VValue := VValue + '<tr><td>'+vAux1+'</td>'+ SLineBreak +
+                        '<td>'+vAux2+'</td>'+ SLineBreak +
+                        '<td>'+vAux3+'</td>' + SLineBreak +
+                        '<td><button type="button" class="btn btn-warning" onclick="javascript:FUNALTERAR('''+vAux1+''','''+vAux2+''','''+vAux3+''')"; >Atualizar</button></td>'+
+                        '<td><button type="button" class="btn btn-warning">Excluir</button></td></tr>'+SLineBreak;
+    ClientDataSet1.Next;
+    //---
+    end;
+  end;
+end;
+
+initialization
+  TIWForm1.SetAsMainForm;
+
+end.
